@@ -197,9 +197,10 @@ function preload() {
   
   const config = {
     type: Phaser.AUTO,
-    width: window.innerWidth,
-    height: window.innerHeight,
+    width: 450,
+    height: 500,
     backgroundColor: "b9eaff",
+    parent: 'game-container',  // Specify the parent container
     physics: {
       default: "arcade",
       arcade: {
@@ -214,7 +215,7 @@ function preload() {
     },
     scale: {
       mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
+      //autoCenter: Phaser.Scale.CENTER_BOTH,
     },
   };
   
@@ -223,4 +224,3 @@ function preload() {
   window.addEventListener('resize', () => {
     game.scale.resize(window.innerWidth, window.innerHeight);
   });
-  
