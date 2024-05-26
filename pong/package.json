@@ -1,0 +1,15 @@
+{
+  "name": "pong-multiplayer",
+  "version": "1.0.0",
+  "description": "Multiplayer Pong game with Node.js and Phaser.js",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js"
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "socket.io": "^4.0.0"
+  },
+  "author": "",
+  "license": "ISC"
+}

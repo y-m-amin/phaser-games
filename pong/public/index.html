@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Phaser Pong Multiplayer</title>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { margin: 0; }
+        canvas { display: block; }
+    </style>
+</head>
+<body>
+    <div id="login">
+        <input type="text" id="username" placeholder="Enter username" />
+        <button onclick="login()">Login</button>
+        <p id="loginError" style="color: red;"></p>
+    </div>
+    <div id="userList" style="display:none;">
+        <h2>Logged-in Users</h2>
+        <ul id="users"></ul>
+    </div>
+    <div id="gameContainer" style="display:none;">
+        <script src="game.js"></script>
+    </div>
+    <script>
+        const socket = io(window.location.origin); // Repl.it will automatically use the correct URL
+        let myUsername = '';
+    
+        function login() {
+            myUsername = document.getElementById('username').value;
+            socket.emit('login', myUsername);
+        }
+    
+        socket.on('loginError', (message) => {
+            document.getElementById('loginError').textContent = message;
+        });
+    
+        socket.on('updateUserList', (users) => {
+            const usersUl = document.getElementById('users');
+            usersUl.innerHTML = '';
+            users.forEach(user => {
+                const li = document.createElement('li');
+                li.textContent = user;
+                li.onclick = () => sendInvitation(user);
+                usersUl.appendChild(li);
+            });
+        });
+    
+        function sendInvitation(to) {
+            socket.emit('sendInvitation', { from: myUsername, to });
+        }
+    
+        socket.on('receiveInvitation', (invite) => {
+            if (confirm(`Accept invitation from ${invite.from}?`)) {
+                socket.emit('acceptInvitation', invite);
+                startGame();
+            } else {
+                socket.emit('rejectInvitation', invite);
+            }
+        });
+    
+        socket.on('invitationAccepted', (data) => {
+            alert('Invitation accepted! Starting game...');
+            startGame();
+        });
+    
+        socket.on('invitationRejected', (data) => {
+            alert('Invitation rejected.');
+        });
+    
+        function startGame() {
+            document.getElementById('userList').style.display = 'none';
+            document.getElementById('gameContainer').style.display = 'block';
+        }
+    </script>
+    
+    
+</body>
+</html>
