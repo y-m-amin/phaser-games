@@ -19,8 +19,8 @@ const game = new Phaser.Game(config);
 
 function preload() {
     // Load images from the local assets folder
-    this.load.image('paddle', 'assets/paddle.png');
-    this.load.image('ball', 'assets/ball.png');
+    this.load.image('paddle', '../assets/paddle.png');
+    this.load.image('ball', '../assets/ball.png');
 }
 
 let paddleLeft, paddleRight, ball;

@@ -50,12 +50,7 @@ function preload() {
     gameState.active = true;
     gameState.enemyVelocity = 1;
   
-    // When gameState.active is false, the game will listen for a pointerup event and restart when the event happens
-    this.input.on("pointerup", () => {
-      if (gameState.active === false) {
-        this.scene.restart();
-      }
-    });
+    
   
     // Creating static platforms
     const platforms = this.physics.add.staticGroup();
@@ -146,6 +141,16 @@ function preload() {
         fill: "#000000",
       });
     });
+
+    // When gameState.active is false, the game will listen for a pointerup event and restart when the event happens
+    this.input.on("pointerup", () => {
+        
+        if (gameState.active === false) {
+          console.log(gameState.active);
+          this.scene.restart();
+          resetGameState();
+        }
+      });
   }
   
   function update() {
@@ -169,8 +174,11 @@ function preload() {
       // Add logic for winning condition and enemy movements below:
       if (numOfTotalEnemies() === 0) {
         gameState.active = false;
+        gameState.palletsLoop.destroy();
         gameState.enemyVelocity = 1;
+        
         this.physics.pause();
+
         this.add.text(125, 250, "You Win!", {
           fontSize: "40px",
           fill: "#000000",
@@ -179,6 +187,7 @@ function preload() {
           fontSize: "25px",
           fill: "#000000",
         });
+        
       } else {
         gameState.enemies.getChildren().forEach((bug) => {
           bug.x += gameState.enemyVelocity;
@@ -186,14 +195,33 @@ function preload() {
         gameState.leftMostBug = sortedEnemies()[0];
         gameState.rightMostBug = sortedEnemies()[sortedEnemies().length - 1];
         if (gameState.leftMostBug.x < 10 || gameState.rightMostBug.x > 440) {
-          gameState.enemyVelocity = gameState.enemyVelocity * -1;
-          gameState.enemies.getChildren().forEach((bug) => {
-            bug.y += 5;
-          });
+          
+            if (numOfTotalEnemies() < 6) {
+                gameState.enemyVelocity = Math.sign(gameState.enemyVelocity) * -1.5;
+                gameState.enemies.getChildren().forEach((bug) => {
+                  bug.y += 13;
+                });
+              } else if (numOfTotalEnemies() < 15) {
+                gameState.enemyVelocity = Math.sign(gameState.enemyVelocity) * -1.2;
+                gameState.enemies.getChildren().forEach((bug) => {
+                  bug.y += 10;
+                });
+              } else {
+                gameState.enemyVelocity = Math.sign(gameState.enemyVelocity) * -1;
+                gameState.enemies.getChildren().forEach((bug) => {
+                  bug.y += 5;
+                });
+              };
         }
       }
     }
   }
+
+  function resetGameState() {
+    gameState.active = true;
+    gameState.enemyVelocity = 1;
+  }
+  
   
   const config = {
     type: Phaser.AUTO,
