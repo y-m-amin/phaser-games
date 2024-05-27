@@ -1,16 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Phaser Pong Game</title>
-    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, minimal-ui" />
     <style>
-        body { margin: 0; }
-        canvas { display: block; }
+        body {
+            padding: 0;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #b9eaff;
+        }
+
+        .links {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        a {
+            display: block;
+            width: 200px;
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background-color: #007BFF; /* Shade of blue */
+            border-radius: 15px;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        a:hover {
+            transform: scale(1.05);
+            background-color: #0056b3; /* Darker shade of blue */
+        }
+
+        canvas {
+            display: block;
+            margin: 0;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
     </style>
 </head>
 <body>
-    <a href="../index.html">Play Bug Invaders</a>
+    <div class="links">
+        <a href="../index.html">Play Bug Invaders</a>
+        <a href="/whackAmole/index.html">Play mini whack A mole</a>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="pong.js"></script>
 </body>
 </html>
