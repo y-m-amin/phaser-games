@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bug Invaders</title>
+  <title>Bug Dodger</title>
   <style>
     body {
       margin: 0;
@@ -37,25 +37,26 @@
       text-align: center;
       text-decoration: none;
       color: white;
-      background-color: #FFA500; 
+      background-color: #FF5733; /* Reddish color */
       border-radius: 15px;
       transition: transform 0.2s, background-color 0.2s;
     }
     a:hover {
       transform: scale(1.05);
-      background-color: #CC8400; 
+      background-color: #CC4626; /* Darker shade of reddish color */
     }
     canvas {
       display: block;
+      margin: auto;
     }
   </style>
 </head>
 <body>
   <div class="links">
-    <a href="/pong_base/index.html">Play 2 player Pong</a>
+    <a href="../index.html">Play Bug Invaders</a>
     <a href="/whackAmole/index.html">Play mini whack A mole</a>
     <a href="/cubematcher/index.html">Play cube matcher</a>
-    <a href="/bugrunner/index.html">Play bug runner</a>
+    <a href="/pong_base/index.html">Play 2 player Pong</a>
   </div>
   <div id="game-container"></div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>

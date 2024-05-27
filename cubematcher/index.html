@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta name = "viewport" content = "width = device-width, initial-scale =
+    1.0, maximum-scale = 1.0, minimum-scale = 1.0, user-scalable = 0,
+    minimal-ui" />
+    <style type="text/css">
+body{
+  padding: 0px;
+  margin: 0px;
+}
+
+.links {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      display: block;
+      width: 200px;
+      padding: 15px;
+      margin: 10px 0;
+      text-align: center;
+      text-decoration: none;
+      color: white;
+      background-color: #4CAF50;
+      border-radius: 15px;
+      transition: transform 0.2s, background-color 0.2s;
+    }
+
+    a:hover {
+      transform: scale(1.05);
+      background-color: #388E3C;
+    }
+
+canvas{
+  display: block;
+  margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+  </style>
+
+    <title>Game Development Path</title>
+  </head>
+  <body>
+    <div class="links">
+        <a href="../index.html">Play Bug Invaders</a>
+        <a href="/pong_base/index.html">Play 2 player Pong</a>
+        <a href="/whackAmole/index.html">Play mini whack A mole</a>
+        <a href="/bugrunner/index.html">Play bug runner</a>
+      </div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
+
+    <script src="StartScene.js"></script>
+    <script src="GameScene.js"></script>
+    <script src="EndScene.js"></script>
+    <script src="game.js"></script>
+  </body>
+</html>
