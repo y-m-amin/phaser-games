@@ -8,28 +8,35 @@
       margin: 0;
       overflow: hidden;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
       height: 100vh;
       width: 100vw;
       background-color: #b9eaff;
+      position: relative;
     }
     #game-container {
-      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
+      width: 800px; /* Adjust the width as needed */
       height: 100%;
     }
     .links {
+      position: absolute;
+      left: 20px;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      padding: 20px;
     }
     .info {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
-      padding: 20px;
     }
     a {
       display: block;
@@ -52,14 +59,10 @@
       padding: 10px;
       font-size: 20px;
       color: #333;
-      /* background-color: #ffffff;
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1); */
       margin: 10px 0;
     }
     canvas {
       display: block;
-      margin: auto;
     }
   </style>
 </head>
