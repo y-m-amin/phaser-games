@@ -17,9 +17,21 @@
             background-color: #b9eaff;
         }
 
-        .links {
+        .links, .info {
             position: absolute;
+            z-index: 1;
+        }
+
+        .links {
             left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info {
+            right: 20px;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
@@ -51,16 +63,31 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            z-index: 0;
+        }
+
+        #info-text {
+            text-align: center;
+            padding: 10px;
+            font-size: 20px;
+            color: #333;
+            background-color: #ffffff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin: 10px 0;
         }
     </style>
 </head>
 <body>
     <div class="links">
         <a href="../index.html">Play Bug Invaders</a>
-        <a href="/whackAmole/index.html">Play mini whack A mole</a>
+        <a href="/whackAmole/index.html">Play Mole Unearther</a>
         <a href="/cubematcher/index.html">Play cube matcher</a>
         <a href="/bugrunner/index.html">Play bug runner</a>
-        
+    </div>
+    <div class="info">
+        <div id="info-text">Left paddle control: W and S key</div>
+        <div id="info-text">Right paddle control: Up and Down arrow key</div>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
     <script src="pong.js"></script>

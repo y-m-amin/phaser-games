@@ -39,6 +39,21 @@ body{
       transform: scale(1.05);
       background-color: #388E3C;
     }
+    #info-text {
+      text-align: center;
+      padding: 10px;
+      font-size: 20px;
+      color: #333;
+      /* background-color: #ffffff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1); */
+      margin: 10px 0;
+    }
+    .info {
+      display: flex;
+      flex-direction: column;
+      padding: 20px;
+    }
 
 canvas{
   display: block;
@@ -56,8 +71,13 @@ canvas{
     <div class="links">
         <a href="../index.html">Play Bug Invaders</a>
         <a href="/pong_base/index.html">Play 2 player Pong</a>
-        <a href="/whackAmole/index.html">Play mini whack A mole</a>
+        <a href="/whackAmole/index.html">Play Mole Unearther</a>
         <a href="/bugrunner/index.html">Play bug runner</a>
+      </div>
+      <div class="info">
+        <div id="info-text">click to destroy blocks of 2 or more similar color
+          try to destroy all blocks before time runs out
+        </div>
       </div>
     <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
 

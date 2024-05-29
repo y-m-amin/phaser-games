@@ -228,7 +228,7 @@ function preload() {
     width: 450,
     height: 500,
     backgroundColor: "b9eaff",
-    parent: 'game-container',  // Specify the parent container
+    parent: 'game-container',  
     physics: {
       default: "arcade",
       arcade: {
@@ -243,7 +243,7 @@ function preload() {
     },
     scale: {
       mode: Phaser.Scale.FIT,
-      //autoCenter: Phaser.Scale.CENTER_BOTH,
+      autoCenter: Phaser.Scale.CENTER_BOTH,
     },
   };
   
