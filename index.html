@@ -1,81 +1,123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Bug Invaders</title>
-  <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      height: 100vh;
-      width: 100vw;
-      background-color: #b9eaff;
-    }
-    #game-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100%;
-    }
-    .links {
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-    .info {
-      display: flex;
-      flex-direction: column;
-      padding: 20px;
-    }
-    a {
-      display: block;
-      width: 200px;
-      padding: 15px;
-      margin: 10px 0;
-      text-align: center;
-      text-decoration: none;
-      color: white;
-      background-color: #FFA500; 
-      border-radius: 15px;
-      transition: transform 0.2s, background-color 0.2s;
-    }
-    a:hover {
-      transform: scale(1.05);
-      background-color: #CC8400; 
-    }
-    #info-text {
-      text-align: center;
-      padding: 10px;
-      font-size: 20px;
-      color: #333;
-      /* background-color: #ffffff; */
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin: 10px 0;
-    }
-    canvas {
-      display: block;
-      margin: auto;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f0f0f0;
+        }
+
+        .links {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        a {
+            position: relative;
+            display: block;
+            width: 200px;
+            height: 40px; /* Initial height */
+            padding: 15px;
+            margin: 10px 0;
+            text-align: center;
+            text-decoration: none;
+            color: white;
+            background-size: cover;
+            background-position: center;
+            border-radius: 15px;
+            overflow: hidden;
+            transition: height 0.2s, background-position 0.2s;
+        }
+
+        a::before {
+            content: attr(data-hover-text);
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            color: white;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        a:hover {
+            height: 80px; /* Height on hover */
+            background-position: top; /* Show more of the image */
+        }
+
+        a:hover::before {
+            opacity: 1;
+        }
+
+        a:hover span {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+        }
+
+        span {
+            position: relative;
+            z-index: 1;
+            display: block;
+            transition: position 0.2s;
+        }
+
+        @media (max-width: 600px) {
+            a {
+                width: 150px;
+                height: 30px; /* Initial height for smaller screens */
+            }
+
+            a:hover {
+                height: 60px; /* Height on hover for smaller screens */
+            }
+        }
+
+        .bug-invaders {
+            background-image: url('/assets/buginvaders.PNG');
+        }
+
+        .pong {
+            background-image: url('/assets/pong.PNG');
+        }
+
+        .mole-unearther {
+            background-image: url('/assets/Mole.PNG');
+        }
+
+        .bug-dodger {
+            background-image: url('/assets/bugDodger.PNG');
+        }
+
+        .cube-matcher {
+            background-image: url('/assets/cubeMatcher.PNG');
+        }
+    </style>
 </head>
 <body>
-  <div class="links">
-    <a href="/pong_base/index.html">Play 2 player Pong</a>
-    <a href="/whackAmole/index.html">Play Mole Unearther</a>
-    <a href="/cubematcher/index.html">Play cube matcher</a>
-    <a href="/bugrunner/index.html">Play Bug Dodger</a>
-  </div>
-  <div id="game-container"></div>
-  <div class="info">
-    <div id="info-text">Move with left and right arrow key</div>
-    <div id="info-text">Spacebar to shoot the bugs</div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
-  <script defer src="game.js"></script>
+    <div class="links">
+        <a href="/buginvaders/index.html" class="bug-invaders" data-hover-text="Play Now">
+            <span>Play Bug Invaders</span>
+        </a>
+        <a href="/pong_base/index.html" class="pong" data-hover-text="Play Now">
+            <span>Play 2 player Pong</span>
+        </a>
+        <a href="/whackAmole/index.html" class="mole-unearther" data-hover-text="Play Now">
+            <span>Play Mole Unearther</span>
+        </a>
+        <a href="/bugrunner/index.html" class="bug-dodger" data-hover-text="Play Now">
+            <span>Play Bug Dodger</span>
+        </a>
+        <a href="/cubematcher/index.html" class="cube-matcher" data-hover-text="Play Now">
+            <span>Play Cube Matcher</span>
+        </a>
+    </div>
 </body>
 </html>

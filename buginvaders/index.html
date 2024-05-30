@@ -2,41 +2,34 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bug Dodger</title>
+  <title>Bug Invaders</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
       display: flex;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
       height: 100vh;
       width: 100vw;
       background-color: #b9eaff;
-      position: relative;
     }
     #game-container {
+      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      width: 800px; /* Adjust the width as needed */
       height: 100%;
     }
     .links {
-      position: absolute;
-      left: 20px;
-      top: 50%;
-      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
+      padding: 20px;
     }
     .info {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
       display: flex;
       flex-direction: column;
+      padding: 20px;
     }
     a {
       display: block;
@@ -46,36 +39,41 @@
       text-align: center;
       text-decoration: none;
       color: white;
-      background-color: #FF5733; 
+      background-color: #FFA500; 
       border-radius: 15px;
       transition: transform 0.2s, background-color 0.2s;
     }
     a:hover {
       transform: scale(1.05);
-      background-color: #CC4626; 
+      background-color: #CC8400; 
     }
     #info-text {
       text-align: center;
       padding: 10px;
       font-size: 20px;
       color: #333;
+      /* background-color: #ffffff; */
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
       margin: 10px 0;
     }
     canvas {
       display: block;
+      margin: auto;
     }
   </style>
 </head>
 <body>
   <div class="links">
-    <a href="/buginvaders/index.html">Play Bug Invaders</a>
+    <a href="/pong_base/index.html">Play 2 player Pong</a>
     <a href="/whackAmole/index.html">Play Mole Unearther</a>
     <a href="/cubematcher/index.html">Play cube matcher</a>
-    <a href="/pong_base/index.html">Play 2 player Pong</a>
+    <a href="/bugrunner/index.html">Play Bug Dodger</a>
   </div>
   <div id="game-container"></div>
   <div class="info">
-    <div id="info-text">Move left and right with arrow keys and dodge the bugs.</div>
+    <div id="info-text">Move with left and right arrow key</div>
+    <div id="info-text">Spacebar to shoot the bugs</div>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
   <script defer src="game.js"></script>
