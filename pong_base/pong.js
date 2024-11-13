@@ -24,9 +24,15 @@ function preload() {
 }
 
 let paddleLeft, paddleRight, ball;
-let cursors,keys;
+let cursors, keys;
 let scoreLeft = 0, scoreRight = 0;
 let scoreTextLeft, scoreTextRight;
+
+// Variables for AI control, which you can adjust for difficulty
+let aiSpeed = 400; // Speed of AI paddle movement
+let aiReactionDelay = 0; // Delay frames for AI reaction
+let aiCurrentFrame = 0; // Counter for AI reaction delay
+let aiTolerance = .01; // Tolerance range to reduce stuttering
 
 function create() {
     // Create paddles with specific sizes
@@ -65,21 +71,30 @@ function create() {
 }
 
 function update() {
-    // Move right paddle up and down arrow keys
-    if (cursors.up.isDown) {
-        paddleRight.setVelocityY(-300);
-    } else if (cursors.down.isDown) {
-        paddleRight.setVelocityY(300);
-    } else {
-        paddleRight.setVelocityY(0);
-    }
-     // Move left paddle with 'W' and 'S' keys
+    // Move left paddle with 'W' and 'S' keys
     if (keys.W.isDown) {
         paddleLeft.setVelocityY(-300);
     } else if (keys.S.isDown) {
         paddleLeft.setVelocityY(300);
     } else {
         paddleLeft.setVelocityY(0);
+    }
+
+    // AI Control for Right Paddle
+    if (aiCurrentFrame >= aiReactionDelay) {
+        if (ball.x > 400){
+            if (ball.y < paddleRight.y) {
+                paddleRight.setVelocityY(-aiSpeed);
+            } else if (ball.y > paddleRight.y) {
+                paddleRight.setVelocityY(aiSpeed);
+            } else {
+                paddleRight.setVelocityY(0);
+            }
+            aiCurrentFrame = 0; // Reset the delay counter
+        } 
+    }
+    else {
+        aiCurrentFrame++;
     }
 
     // Check for scoring
@@ -95,7 +110,6 @@ function update() {
         resetBall();
     }
 }
-
 function moveUpPaddleLeft() {
     paddleLeft.setVelocityY(-300);
 }
