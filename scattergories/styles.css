@@ -1,0 +1,18 @@
+#game-container {
+  display: flex;
+  flex-direction: column;
+  margin: 20px 50px;
+  justify-content: center;
+  align-items: center;
+  gap: 40px;
+}
+
+.inputs-row {
+  display: flex;
+  gap: 40px;
+}
+
+.submit {
+  display: flex;
+  justify-content: center;
+}

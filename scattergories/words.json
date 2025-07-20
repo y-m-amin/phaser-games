@@ -1,0 +1,6 @@
+{
+  "name": ["john", "alice", "bob", "diana"],
+  "country": ["japan", "bangladesh", "canada", "france"],
+  "fruit": ["mango", "apple", "banana", "orange"],
+  "flower": ["jasmine", "rose", "tulip", "lily"]
+}
