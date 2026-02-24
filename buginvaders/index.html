@@ -1,121 +1,183 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Bug Invaders</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, minimal-ui" />
-  <style>
-   body {
-      margin: 0;
-      overflow: hidden;
-      height: 100vh;
-      width: 100vw;
-      background-color: #b9eaff;
-      display: flex;
-      flex-direction: column;
-    }
+  <head>
+    <meta charset="UTF-8" />
+    <title>Bug Invaders</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, user-scalable=0, minimal-ui"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+        height: 100vh;
+        width: 100vw;
+        background-color: #b9eaff;
+        display: flex;
+        flex-direction: column;
+        font-family:
+          'Inter',
+          -apple-system,
+          BlinkMacSystemFont,
+          'Segoe UI',
+          sans-serif;
+      }
 
-    .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background-color: #ee9851;
-      padding: 10px 20px;
-      /* width: 100%;
-      z-index: 1; */
-    }
+      .navbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: linear-gradient(135deg, #ee9851 0%, #eb8430 100%);
+        padding: 1rem 2rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
 
-    .navbar a {
-      color: white;
-      text-decoration: none;
-      padding: 10px 20px;
-      border-radius: 5px;
-      transition: background-color 0.2s;
-    }
+      .navbar a {
+        color: white;
+        text-decoration: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-size: 0.95rem;
+      }
 
-    .navbar a:hover {
-      background-color: #eb8430;
-    }
+      .navbar a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+      }
 
-    .dropdown {
-      position: relative;
-      display: inline-block;
-    }
+      .dropdown {
+        position: relative;
+        display: inline-block;
+      }
 
-    .dropdown-content {
-      display: none;
-      position: absolute;
-      right: 0;
-      background-color: #ec8937;
-      min-width: 160px;
-      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
-      z-index: 1;
-      border-radius: 5px;
-    }
+      .dropdown-content {
+        display: none;
+        position: absolute;
+        right: 0;
+        background: white;
+        min-width: 200px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 0.5rem;
+      }
 
-    .dropdown-content a {
-      color: white;
-      padding: 12px 16px;
-      text-decoration: none;
-      display: block;
-      text-align: left;
-      border-radius: 5px;
-    }
+      .dropdown-content a {
+        color: #2c3e50;
+        padding: 1rem 1.5rem;
+        text-decoration: none;
+        display: block;
+        text-align: left;
+        border-radius: 0;
+        transition: all 0.2s ease;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
 
-    .dropdown-content a:hover {
-      background-color: #d69636;
-    }
+      .dropdown-content a:last-child {
+        border-bottom: none;
+      }
 
-    .dropdown:hover .dropdown-content {
-      display: block;
-    }
+      .dropdown-content a:hover {
+        background: linear-gradient(135deg, #ee9851 0%, #eb8430 100%);
+        color: white;
+        transform: none;
+      }
 
-    #game-container {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
+      .dropdown:hover .dropdown-content {
+        display: block;
+        animation: fadeIn 0.3s ease;
+      }
 
-    .info {
-      text-align: center;
-      padding: 10px;
-      font-size: 20px;
-      color: #333;
-      /* background-color: #ffffff; */
-      border-radius: 10px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-      margin: 10px 0;
-    }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(-10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
 
-    canvas {
-      display: block;
-      margin: auto;
-      align-content: center;
-    }
-  </style>
-</head>
-<body>
-  <div class="navbar">
-    <a href="../index.html">Home</a>
-    <div class="dropdown">
-      <a href="javascript:void(0)">Games</a>
-      <div class="dropdown-content">
-        <a href="/pong_base/index.html">Play Pong</a>
-        <a href="/whackAmole/index.html">Play Mole Unearther</a>
-        <a href="/cubematcher/index.html">Play Cube Matcher</a>
-        <a href="/bugrunner/index.html">Play Bug Dodger</a>
+      #game-container {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .info {
+        text-align: center;
+        padding: 1rem;
+        font-size: 1rem;
+        color: #333;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin: 1rem;
+      }
+
+      #info-text {
+        margin: 0.5rem 0;
+        font-weight: 500;
+      }
+
+      canvas {
+        display: block;
+        margin: auto;
+        align-content: center;
+      }
+
+      @media (max-width: 768px) {
+        .navbar {
+          padding: 0.75rem 1rem;
+        }
+
+        .navbar a {
+          padding: 0.5rem 1rem;
+          font-size: 0.9rem;
+        }
+
+        .dropdown-content {
+          min-width: 160px;
+        }
+
+        .info {
+          font-size: 0.9rem;
+          padding: 0.75rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="navbar">
+      <a href="../index.html">🏠 Home</a>
+      <div class="dropdown">
+        <a href="javascript:void(0)">🎮 Games</a>
+        <div class="dropdown-content">
+          <a href="/pong_base/index.html">🏓 Pong</a>
+          <a href="/whackAmole/index.html">🔨 Mole Unearther</a>
+          <a href="/cubematcher/index.html">🧩 Cube Matcher</a>
+          <a href="/bugrunner/index.html">🏃 Bug Dodger</a>
+        </div>
       </div>
     </div>
-  </div>
-  <div id="game-container"></div>
-  <div class="info">
-    <div id="info-text">Move with left and right arrow key</div>
-    <div id="info-text">Spacebar to shoot the bugs</div>
-  </div>
-  <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
-  <script defer src="game.js"></script>
-</body>
+    <div id="game-container"></div>
+    <div class="info">
+      <div id="info-text">Move with left and right arrow key</div>
+      <div id="info-text">Spacebar to shoot the bugs</div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3.16.2/dist/phaser.min.js"></script>
+    <script defer src="game.js"></script>
+  </body>
 </html>
