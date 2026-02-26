@@ -1,4 +1,24 @@
-function preload() {
+// Helper Methods
+function sortedEnemies(enemiesGroup) {
+  return enemiesGroup.getChildren().sort((a, b) => a.x - b.x);
+}
+function numOfTotalEnemies(enemiesGroup) {
+  return enemiesGroup.getChildren().length;
+}
+
+class GameScene extends Phaser.Scene {
+  constructor() {
+    super({ key: "GameScene" });
+
+    // Touch control state
+    this.leftTouchIds = new Set();
+    this.rightTouchIds = new Set();
+    this.controlBandTopY = 360; // updated in create() based on game height
+    this.shootCooldownMs = 180;
+    this.lastShotAt = 0;
+  }
+
+  preload() {
     this.load.image(
       "bug1",
       "https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/bug_1.png"
@@ -28,227 +48,238 @@ function preload() {
       "https://content.codecademy.com/courses/learn-phaser/Bug%20Invaders/bugRepellent.png"
     );
   }
-  
-  // Helper Methods below:
-  // sortedEnemies() returns an array of enemy sprites sorted by their x coordinate
-  function sortedEnemies() {
-    const orderedByXCoord = gameState.enemies
-      .getChildren()
-      .sort((a, b) => a.x - b.x);
-    return orderedByXCoord;
-  }
-  // numOfTotalEnemies() returns the number of total enemies
-  function numOfTotalEnemies() {
-    const totalEnemies = gameState.enemies.getChildren().length;
-    return totalEnemies;
-  }
-  
-  const gameState = {};
-  
-  function create() {
-    // When gameState.active is true, the game is being played and not over. When gameState.active is false, then it's game over
-    gameState.active = true;
-    gameState.enemyVelocity = 1;
-  
-    
-  
-    // Creating static platforms
+
+  create() {
+    this.activeGame = true;
+    this.enemyVelocity = 1;
+
+    // Reset touch state
+    this.leftTouchIds.clear();
+    this.rightTouchIds.clear();
+
+    // Controls band (bottom area) for hold-to-move
+    const h = Number(this.sys.game.config.height);
+    this.controlBandTopY = Math.floor(h * 0.72); // bottom ~28% of screen is "controls"
+
+    // Platforms
     const platforms = this.physics.add.staticGroup();
     platforms.create(225, 490, "platform").setScale(1, 0.3).refreshBody();
-  
-    // Displays the initial number of bugs, this value is initially hardcoded as 24
-    gameState.scoreText = this.add.text(175, 482, "Bugs Left: 24", {
+
+    // Score text
+    this.scoreText = this.add.text(175, 482, "Bugs Left: 24", {
       fontSize: "15px",
       fill: "#000000",
     });
-  
-    // Uses the physics plugin to create Codey
-    gameState.player = this.physics.add.sprite(225, 450, "codey").setScale(0.5);
-  
-    // Create Collider objects
-    gameState.player.setCollideWorldBounds(true);
-    this.physics.add.collider(gameState.player, platforms);
-  
-    // Creates cursor objects to be used in update()
-    gameState.cursors = this.input.keyboard.createCursorKeys();
-  
-    // Add new code below:
-    gameState.enemies = this.physics.add.group();
-  
+
+    // Player
+    this.player = this.physics.add.sprite(225, 450, "codey").setScale(0.5);
+    this.player.setCollideWorldBounds(true);
+    this.physics.add.collider(this.player, platforms);
+
+    // Keyboard
+    this.cursors = this.input.keyboard.createCursorKeys();
+
+    // Enemies
+    this.enemies = this.physics.add.group();
     for (let yVal = 1; yVal < 4; yVal++) {
       for (let xVal = 1; xVal < 9; xVal++) {
-        gameState.enemies
+        this.enemies
           .create(50 * xVal, 50 * yVal, "bug1")
           .setScale(0.6)
           .setGravityY(-200);
       }
     }
+
+    // Enemy pellets
     const pellets = this.physics.add.group();
-    function genPellet() {
-      let randomBug = Phaser.Utils.Array.GetRandom(
-        gameState.enemies.getChildren()
-      );
+    const genPellet = () => {
+      const kids = this.enemies.getChildren();
+      if (!kids.length) return;
+      const randomBug = Phaser.Utils.Array.GetRandom(kids);
       pellets.create(randomBug.x, randomBug.y, "bugPellet");
-    }
-  
-    gameState.palletsLoop = this.time.addEvent({
+    };
+
+    this.pelletsLoop = this.time.addEvent({
       delay: 300,
       callback: genPellet,
       callbackScope: this,
       loop: true,
     });
-  
+
     this.physics.add.collider(pellets, platforms, (pellet) => {
       pellet.destroy();
     });
-    this.physics.add.collider(pellets, gameState.player, () => {
-      gameState.active = false;
-      gameState.palletsLoop.destroy();
-      gameState.enemyVelocity = 1;
-     this.add.text(125, 250, "Game Over!", {
-        fontSize: "40px",
-        fill: "#000000",
-      });
-      this.add.text(120, 300, "Click to restart", {
-        fontSize: "25px",
-        fill: "#000000",
-      });
-      this.physics.pause();
-    });
-  
-    gameState.bugRepellent = this.physics.add.group();
-  
-    this.physics.add.collider(
-      gameState.enemies,
-      gameState.bugRepellent,
-      (bug, repellent) => {
-        bug.destroy();
-        repellent.destroy();
-        gameState.scoreText.setText(`Bugs Left: ${numOfTotalEnemies()}`);
-      }
-    );
-  
-    this.physics.add.collider(gameState.enemies, gameState.player, () => {
-      gameState.active = false;
-      gameState.enemyVelocity = 1;
-      this.physics.pause();
-      this.add.text(125, 250, "Game Over!", {
-        fontSize: "40px",
-        fill: "#000000",
-      });
-      this.add.text(120, 300, "Click to restart", {
-        fontSize: "25px",
-        fill: "#000000",
-      });
+
+    this.physics.add.collider(pellets, this.player, () => {
+      this.endGame("lose");
     });
 
-    // When gameState.active is false, the game will listen for a pointerup event and restart when the event happens
-    this.input.on("pointerup", () => {
-        
-        if (gameState.active === false) {
-          console.log(gameState.active);
-          this.scene.restart();
-          resetGameState();
-        }
-      });
+    // Player shots
+    this.bugRepellent = this.physics.add.group();
+
+    this.physics.add.collider(this.enemies, this.bugRepellent, (bug, repellent) => {
+      bug.destroy();
+      repellent.destroy();
+      this.scoreText.setText(`Bugs Left: ${numOfTotalEnemies(this.enemies)}`);
+    });
+
+    this.physics.add.collider(this.enemies, this.player, () => {
+      this.endGame("lose");
+    });
+
+    // Mobile controls: hold bottom left/right to move, tap above band to shoot
+    this.bindTouchControls();
   }
-  
-  function update() {
-    if (gameState.active) {
-      // If the game is active, then players can control Codey
-      if (gameState.cursors.left.isDown) {
-        gameState.player.setVelocityX(-160);
-      } else if (gameState.cursors.right.isDown) {
-        gameState.player.setVelocityX(160);
-      } else {
-        gameState.player.setVelocityX(0);
-      }
-  
-      // Execute code if the spacebar key is pressed
-      if (Phaser.Input.Keyboard.JustDown(gameState.cursors.space)) {
-        gameState.bugRepellent
-          .create(gameState.player.x, gameState.player.y, "bugRepellent")
-          .setGravityY(-400);
-      }
-  
-      // Add logic for winning condition and enemy movements below:
-      if (numOfTotalEnemies() === 0) {
-        gameState.active = false;
-        gameState.palletsLoop.destroy();
-        gameState.enemyVelocity = 1;
-        
-        this.physics.pause();
 
-        this.add.text(125, 250, "You Win!", {
-          fontSize: "40px",
-          fill: "#000000",
-        });
-        this.add.text(120, 300, "Click to restart", {
-          fontSize: "25px",
-          fill: "#000000",
-        });
-        
+  bindTouchControls() {
+    const w = Number(this.sys.game.config.width);
+
+    const handleDown = (pointer) => {
+      if (!this.activeGame) return;
+
+      // If tap is ABOVE controls band => shoot
+      if (pointer.y < this.controlBandTopY) {
+        this.tryShoot();
+        return;
+      }
+
+      // Bottom band: hold to move
+      if (pointer.x < w / 2) this.leftTouchIds.add(pointer.id);
+      else this.rightTouchIds.add(pointer.id);
+    };
+
+    const handleUp = (pointer) => {
+      this.leftTouchIds.delete(pointer.id);
+      this.rightTouchIds.delete(pointer.id);
+    };
+
+    this.input.on("pointerdown", handleDown);
+    this.input.on("pointerup", handleUp);
+    this.input.on("pointerupoutside", handleUp);
+
+    // If finger moves across halves while holding, update direction
+    this.input.on("pointermove", (pointer) => {
+      if (!pointer.isDown) return;
+      if (pointer.y < this.controlBandTopY) return;
+
+      // If it crossed halves, move id sets accordingly
+      const inLeft = pointer.x < w / 2;
+      if (inLeft) {
+        this.rightTouchIds.delete(pointer.id);
+        this.leftTouchIds.add(pointer.id);
       } else {
-        gameState.enemies.getChildren().forEach((bug) => {
-          bug.x += gameState.enemyVelocity;
-        });
-        gameState.leftMostBug = sortedEnemies()[0];
-        gameState.rightMostBug = sortedEnemies()[sortedEnemies().length - 1];
-        if (gameState.leftMostBug.x < 10 || gameState.rightMostBug.x > 440) {
-          
-            if (numOfTotalEnemies() < 6) {
-                gameState.enemyVelocity = Math.sign(gameState.enemyVelocity) * -1.5;
-                gameState.enemies.getChildren().forEach((bug) => {
-                  bug.y += 13;
-                });
-              } else if (numOfTotalEnemies() < 15) {
-                gameState.enemyVelocity = Math.sign(gameState.enemyVelocity) * -1.2;
-                gameState.enemies.getChildren().forEach((bug) => {
-                  bug.y += 10;
-                });
-              } else {
-                gameState.enemyVelocity = Math.sign(gameState.enemyVelocity) * -1;
-                gameState.enemies.getChildren().forEach((bug) => {
-                  bug.y += 5;
-                });
-              };
-        }
+        this.leftTouchIds.delete(pointer.id);
+        this.rightTouchIds.add(pointer.id);
+      }
+    });
+  }
+
+  tryShoot() {
+    const now = Date.now();
+    if (now - this.lastShotAt < this.shootCooldownMs) return;
+    this.lastShotAt = now;
+
+    if (!this.activeGame) return;
+
+    this.bugRepellent
+      .create(this.player.x, this.player.y, "bugRepellent")
+      .setGravityY(-400);
+  }
+
+  endGame(result) {
+    if (!this.activeGame) return;
+
+    this.activeGame = false;
+    this.enemyVelocity = 1;
+
+    if (this.pelletsLoop) this.pelletsLoop.destroy();
+
+    this.physics.pause();
+
+    // small delay so it feels responsive but clean
+    this.time.delayedCall(150, () => {
+      this.scene.start("EndScene", { result });
+    });
+  }
+
+  update() {
+    if (!this.activeGame) return;
+
+    // Keyboard movement
+    let movingLeft = this.cursors.left.isDown;
+    let movingRight = this.cursors.right.isDown;
+
+    // Touch movement overrides / adds
+    if (this.leftTouchIds.size > 0) {
+      movingLeft = true;
+      movingRight = false;
+    } else if (this.rightTouchIds.size > 0) {
+      movingRight = true;
+      movingLeft = false;
+    }
+
+    if (movingLeft) this.player.setVelocityX(-160);
+    else if (movingRight) this.player.setVelocityX(160);
+    else this.player.setVelocityX(0);
+
+    // Keyboard shoot
+    if (Phaser.Input.Keyboard.JustDown(this.cursors.space)) {
+      this.tryShoot();
+    }
+
+    // Win condition
+    if (numOfTotalEnemies(this.enemies) === 0) {
+      this.endGame("win");
+      return;
+    }
+
+    // Enemy movement
+    this.enemies.getChildren().forEach((bug) => {
+      bug.x += this.enemyVelocity;
+    });
+
+    const ordered = sortedEnemies(this.enemies);
+    const leftMost = ordered[0];
+    const rightMost = ordered[ordered.length - 1];
+
+    if (leftMost.x < 10 || rightMost.x > 440) {
+      const remaining = numOfTotalEnemies(this.enemies);
+
+      if (remaining < 6) {
+        this.enemyVelocity = Math.sign(this.enemyVelocity) * -1.5;
+        this.enemies.getChildren().forEach((bug) => (bug.y += 13));
+      } else if (remaining < 15) {
+        this.enemyVelocity = Math.sign(this.enemyVelocity) * -1.2;
+        this.enemies.getChildren().forEach((bug) => (bug.y += 10));
+      } else {
+        this.enemyVelocity = Math.sign(this.enemyVelocity) * -1;
+        this.enemies.getChildren().forEach((bug) => (bug.y += 5));
       }
     }
   }
+}
 
-  function resetGameState() {
-    gameState.active = true;
-    gameState.enemyVelocity = 1;
-  }
-  
-  
-  const config = {
-    type: Phaser.AUTO,
-    width: 450,
-    height: 500,
-    backgroundColor: "b9eaff",
-    parent: 'game-container',  
-    physics: {
-      default: "arcade",
-      arcade: {
-        gravity: { y: 200 },
-        enableBody: true,
-      },
+window.GameScene = GameScene;
+
+// Phaser config + boot
+const config = {
+  type: Phaser.AUTO,
+  width: 450,
+  height: 500,
+  backgroundColor: "b9eaff",
+  parent: "game-container",
+  physics: {
+    default: "arcade",
+    arcade: {
+      gravity: { y: 200 },
+      enableBody: true,
     },
-    scene: {
-      preload,
-      create,
-      update,
-    },
-    scale: {
-      mode: Phaser.Scale.FIT,
-      autoCenter: Phaser.Scale.CENTER_BOTH,
-    },
-  };
-  
-  const game = new Phaser.Game(config);
-  
-  window.addEventListener('resize', () => {
-    game.scale.resize(window.innerWidth, window.innerHeight);
-  });
+  },
+  scene: [window.StartScene, window.GameScene, window.EndScene],
+  scale: {
+    mode: Phaser.Scale.FIT,
+    autoCenter: Phaser.Scale.CENTER_BOTH,
+  },
+};
+
+new Phaser.Game(config);
