@@ -22,7 +22,7 @@ class GameScene extends Phaser.Scene {
     // Add background
     this.add.image(0, 0, 'grid').setOrigin(0).setScale(0.50);
     // Set boundaries of the game
-    this.physics.world.setBounds(0, 0, 480, 600);
+    this.physics.world.setBounds(0, 0, 480, 640);
     // Create a 12 x 12 board
     board = this.makeBoard(12);
     // Create and display high score
@@ -45,11 +45,11 @@ class GameScene extends Phaser.Scene {
       { fontSize: '25px', fill: '#fff' }
     );
     // Phaser timer event
-    this.time.addEvent({
-      delay: 1000, // in milliseconds = 1 second
+    this.timerEvent = this.time.addEvent({
+      delay: 1000,
       callback: onTimedEvent,
       callbackScope: this,
-      loop: true
+      loop: true,
     });
     // Helper function to format time in minutes and seconds
     function formatTime(seconds) {
@@ -69,38 +69,31 @@ class GameScene extends Phaser.Scene {
       }
     }
     // Listener for clicks on cubes
-    this.input.on('gameobjectdown', function(pointer, cube, event) {
-      // Declare a constant, neighborCubes, below
-      const neighborCubes = getNeighbors(cube);
-      // Remove matching cubes from game if there's at least 2 of them
-      if (neighborCubes.length > 1) {
-        // Update score
-        score += neighborCubes.length;
-        scoreText.setText(`Score: ${score}`);
-        // Update high score if necessary
-        if (score > highScore) {
-          highScore = score;
-          highScoreText.setText(`High Score: ${highScore}`);
-          localStorage.setItem('highScore', highScore);
-        }
-        // Update each cube in neighborCubes here
-        neighborCubes.forEach(neighbor => {
-          neighbor.destroy();
-          renderCubes(neighbor);
-        });
-        removeCols();
+    this.input.on("gameobjectdown", (pointer, cube) => {
+    const neighborCubes = getNeighbors(cube);
+
+    if (neighborCubes.length > 1) {
+      score += neighborCubes.length;
+      scoreText.setText(`Score: ${score}`);
+
+      if (score > highScore) {
+        highScore = score;
+        highScoreText.setText(`High Score: ${highScore}`);
+        localStorage.setItem("highScore", highScore);
       }
 
-      // Helper function moves cube sprites down
-      function renderCubes(cube) {
-        for (let row = 0; row < cube.row; row++) {
-          board[cube.col][row].y += cubeSize;
-          board[cube.col][row].row += 1;
+      // Remove from board FIRST, then destroy sprites
+      neighborCubes.forEach((cb) => {
+        // clear from board so future lookups never see dead cubes
+        if (board[cb.col] && board[cb.col][cb.row] === cb) {
+          board[cb.col][cb.row] = null;
         }
-        let removed = board[cube.col].splice(cube.row, 1);
-        board[cube.col] = removed.concat(board[cube.col]);
-      }
-    });
+        cb.destroy();
+      });
+
+      collapseBoard(this);
+    }
+  });
   }
 
   update() {
@@ -140,115 +133,151 @@ class GameScene extends Phaser.Scene {
     // Add some information to make it easier to find a cube
     cube.col = colIndex;
     cube.row = rowIndex;
-    cube.removed = false;
+    //cube.removed = false;
 
     return cube;
   }
   
   endGame() {
-    // Stop sprites moving
+    if (this.ending) return;
+    this.ending = true;
+
+    if (this.timerEvent) this.timerEvent.remove(false);
     this.physics.pause();
-    // Transition to end scene w/fade
-    this.cameras.main.fade(800, 0, 0, 0, false, function(camera, progress) {
-      if (progress > 0.5) {
-        this.scene.stop('GameScene');
-        this.scene.start('EndScene');
-      }
+
+    this.cameras.main.fade(800, 0, 0, 0);
+
+    this.cameras.main.once("camerafadeoutcomplete", () => {
+      this.scene.start("EndScene");
     });
   }
 }
 
-// Helper function that only checks the immediate neighbors of a cube
-const checkClosest = (cube) => {
+
+// ===== Helpers (new model: board holds Cube sprites or null) =====
+
+const BOARD_SIZE = 12;
+const sideMargin = 31;
+const topMargin = 30;
+
+const cubeX = (col) => col * cubeSize + sideMargin;
+const cubeY = (row) => row * cubeSize + topMargin;
+
+const inBounds = (col, row) =>
+  col >= 0 && col < board.length && row >= 0 && row < BOARD_SIZE;
+
+const getCubeAt = (col, row) => (inBounds(col, row) ? board[col][row] : null);
+
+const getNeighbors = (startCube) => {
+  if (!startCube || !startCube.active) return [];
+
+  const targetColor = startCube.frame.name;
+  const visited = new Set();
+  const queue = [startCube];
   const results = [];
-  const directions = [
-    { row: 0, col: -1 },
-    { row: 0, col: 1 },
-    { row: -1, col: 0 },
-    { row: 1, col: 0 }
-  ];
-  const currCol = cube.col;
-  const currRow = cube.row;
-  const color = cube.frame.name;
 
-  directions.forEach(direction => {
-    const newCol = currCol + direction.col;
-    const newRow = currRow + direction.row;
+  const keyOf = (cube) => `${cube.col},${cube.row}`;
 
-    if (
-      !board[newCol] ||
-      !board[newCol][newRow] ||
-      board[newCol][newRow].removed
-    ) {
-      return;
+  while (queue.length) {
+    const curr = queue.shift();
+    if (!curr || !curr.active) continue;
+
+    const k = keyOf(curr);
+    if (visited.has(k)) continue;
+    visited.add(k);
+
+    if (curr.frame.name !== targetColor) continue;
+
+    results.push(curr);
+
+    const dirs = [
+      { dc: -1, dr: 0 },
+      { dc: 1, dr: 0 },
+      { dc: 0, dr: -1 },
+      { dc: 0, dr: 1 },
+    ];
+
+    for (const { dc, dr } of dirs) {
+      const next = getCubeAt(curr.col + dc, curr.row + dr);
+      if (next && next.active) queue.push(next);
     }
-
-    if (color === board[newCol][newRow].frame.name) {
-      results.push(board[newCol][newRow]);
-    }
-  });
-
-  return results;
-}
-
-// Helper function to get neighborCubes of a block
-const getNeighbors = (cube) => {
-  let start = cube;
-  let cubesToCheck = [start];
-  let validNeighborCubes = [];
-
-  while (cubesToCheck.length > 0) {
-    let curr = cubesToCheck.shift();
-
-    if (curr.removed === false) {
-      validNeighborCubes.push(curr);
-      curr.removed = true;
-    }
-
-    const matches = checkClosest(curr);
-    matches.forEach(match => {
-      if (!match.removed) {
-        match.removed = true;
-        validNeighborCubes.push(match);
-        cubesToCheck.push(match);
-      }
-    });
   }
 
-  if (validNeighborCubes.length === 1) {
-    validNeighborCubes[0].removed = false;
-    validNeighborCubes = [];
-  }
+  return results.length >= 2 ? results : [];
+};
 
-  console.log("Neighboring cubes:", validNeighborCubes);
-  return validNeighborCubes;
-}
+const collapseBoard = (scene) => {
+  // 1) collapse each column downward
+  for (let c = 0; c < board.length; c++) {
+    const col = board[c];
+    const remaining = col.filter((cube) => cube && cube.active);
 
-// Helper function shifts removes empty columns
-const removeCols = () => {
-  const emptyCols = board.map((col, i) => {
-    const isEmpty = col.every(cube => cube.removed);
-    return isEmpty ? i : -1;
-  }).filter(index => index !== -1);
+    const newCol = Array(BOARD_SIZE).fill(null);
+    const startRow = BOARD_SIZE - remaining.length;
 
-  emptyCols.forEach(emptyCol => {
-    const columnsToMove = board.slice(emptyCol + 1);
-    columnsToMove.forEach(col => {
-      col.forEach(cube => {
-        cube.x -= cubeSize;
-        cube.col--;
+    for (let i = 0; i < remaining.length; i++) {
+      const cube = remaining[i];
+      const newRow = startRow + i;
+
+      newCol[newRow] = cube;
+      cube.row = newRow;
+
+      scene.tweens.killTweensOf(cube);
+      scene.tweens.add({
+        targets: cube,
+        y: cubeY(newRow),
+        duration: 120,
+        ease: "Quad.easeOut",
       });
-    });
-  });
+    }
 
-  board.splice(emptyCols[0], emptyCols.length);
-}
+    board[c] = newCol;
+  }
 
-// Helper function to check remaining moves
+  // 2) remove empty columns
+  board = board.filter((col) => col.some((cube) => cube && cube.active));
+
+  // 3) update col and shift x
+  for (let c = 0; c < board.length; c++) {
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      const cube = board[c][r];
+      if (!cube || !cube.active) continue;
+
+      cube.col = c;
+
+      scene.tweens.killTweensOf(cube);
+      scene.tweens.add({
+        targets: cube,
+        x: cubeX(c),
+        duration: 120,
+        ease: "Quad.easeOut",
+      });
+    }
+  }
+};
+
 const remainingMoves = () => {
-  return board.some(col => doesColumnContainValidMoves(col));
-}
+  for (let c = 0; c < board.length; c++) {
+    for (let r = 0; r < BOARD_SIZE; r++) {
+      const cube = board[c][r];
+      if (!cube || !cube.active) continue;
 
-const doesColumnContainValidMoves = (column) => {
-  return column.some(cube => !cube.removed && checkClosest(cube).length > 0);
-}
+      const color = cube.frame.name;
+
+      const n1 = getCubeAt(c - 1, r);
+      const n2 = getCubeAt(c + 1, r);
+      const n3 = getCubeAt(c, r - 1);
+      const n4 = getCubeAt(c, r + 1);
+
+      if (
+        (n1 && n1.active && n1.frame.name === color) ||
+        (n2 && n2.active && n2.frame.name === color) ||
+        (n3 && n3.active && n3.frame.name === color) ||
+        (n4 && n4.active && n4.frame.name === color)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
